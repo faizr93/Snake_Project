@@ -24,37 +24,33 @@ int main()
     const int GRID_SIZE = 40;
     bool gameOver = false;
 
-    Segment snakeHead, s1, s2, food;
-    
+    Segment snakeHead, food;
+
     snakeHead.rect.SetSize({GRID_SIZE, GRID_SIZE});
     snakeHead.rect.SetPosition(40, 40);
     snakeHead.color = GREEN;
 
-    s1 = s2 = food = snakeHead;
-    
-    food.color = RED;
+    food = snakeHead;
 
-    s1.rect.SetPosition({80, 40});
-    s2.rect.SetPosition({120, 40});
+    food.color = RED;
     food.rect.SetPosition({400, 200});
 
-    vector<Segment> segments = {snakeHead, s1, s2}; // Container for snake
-    int length = 5;
-    int timeStepIterator = 0;
-    char currentDirection = 'd';
-    char nextDirection = 'd';
+    // clang-format off
+    vector<Segment> segments         = {snakeHead};  // Container for snake
+    int             length           = 5;
+    int             timeStepIterator = 0;
+    char            currentDirection = 'd';
+    char            nextDirection    = 'd';
 
+    initSnake();
     while (!WindowShouldClose())
     {
+
         // Check If Move is Valid
-        if (IsKeyDown(KEY_W) && currentDirection != 's')
-            nextDirection = 'w';
-        else if (IsKeyDown(KEY_S) && currentDirection != 'w')
-            nextDirection = 's';
-        else if (IsKeyDown(KEY_A) && currentDirection != 'd')
-            nextDirection = 'a';
-        else if (IsKeyDown(KEY_D) && currentDirection != 'a')
-            nextDirection = 'd';
+        if      (IsKeyDown(KEY_W) && currentDirection != 's') nextDirection = 'w';
+        else if (IsKeyDown(KEY_S) && currentDirection != 'w') nextDirection = 's';
+        else if (IsKeyDown(KEY_A) && currentDirection != 'd') nextDirection = 'a';
+        else if (IsKeyDown(KEY_D) && currentDirection != 'a') nextDirection = 'd';
 
         // Set Snake Direction
         currentDirection = nextDirection;
@@ -70,7 +66,8 @@ int main()
         // Wrap Snake
         wrapSnake(segments, GRID_SIZE);
 
-        if (segments[0].rect.x == food.rect.x && segments[0].rect.y == food.rect.y )
+        if (segments[0].rect.x == food.rect.x &&
+            segments[0].rect.y == food.rect.y)
         {
             length++;
             grow(segments);
@@ -79,7 +76,8 @@ int main()
             food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
             for (auto &s : segments)
             {
-                if(CheckCollisionRecs(s.rect, food.rect)) goto foodGeneration;
+                if (CheckCollisionRecs(s.rect, food.rect))
+                    goto foodGeneration;
             }
         }
 
@@ -89,8 +87,17 @@ int main()
                 CheckCollisionRecs(sI.rect, sJ.rect);
             gameOver = true;
         }
-
-        render(segments,food);
+        if (gameOver)
+        {
+            BeginDrawing;
+            ClearBackground(RED);
+            EndDrawing;
+            segments.clear();
+            segments.push_back(snakeHead);
+            length = 3;
+            gameOver = false;
+        }
+        render(segments, food);
     }
 }
 
@@ -100,8 +107,11 @@ void render(std::vector<Segment> &segments, Segment &food)
     BeginDrawing();
     ClearBackground(BLACK);
 
-    for (auto &segment : segments)
-        segment.draw();
+    for (auto &s : segments) 
+    {
+        s.draw();
+        s.drawOutline();
+    }
 
     food.draw();
     EndDrawing();
@@ -156,4 +166,15 @@ void grow(std::vector<Segment> &segments)
     newSegment.color = tail.color;
 
     segments.push_back(newSegment);
+}
+// clang-format on
+
+void initSnake(std::vector<Segment> &segments)
+{
+growSnakeLabel:
+    if (segments.size() < 3)
+    {
+        grow(segments);
+        goto growSnakeLabel;
+    }
 }

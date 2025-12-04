@@ -7,4 +7,5 @@ class Segment
     raylib::Color color;
 
     void draw();
+    void drawOutline();
 };
