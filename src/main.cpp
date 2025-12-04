@@ -1,8 +1,3 @@
-/* Pixel Cords to grid, we have grid, x = grid.x.pixelX or somthin
-MoveHead
-MoveEachSegmentToPreviousInSuccession
-Eat = pushbackTail.
-*/
 #include "main.h"
 #include "raylib-cpp.hpp"
 #include <conio.h>
@@ -24,33 +19,37 @@ int main()
     const int GRID_SIZE = 40;
     bool gameOver = false;
 
-    Segment snakeHead, food;
+    Segment snakeHead, s1, s2, food;
 
     snakeHead.rect.SetSize({GRID_SIZE, GRID_SIZE});
     snakeHead.rect.SetPosition(40, 40);
     snakeHead.color = GREEN;
 
-    food = snakeHead;
+    s1 = s2 = food = snakeHead;
 
     food.color = RED;
+
+    s1.rect.SetPosition({80, 40});
+    s2.rect.SetPosition({120, 40});
     food.rect.SetPosition({400, 200});
 
-    // clang-format off
-    vector<Segment> segments         = {snakeHead};  // Container for snake
-    int             length           = 5;
-    int             timeStepIterator = 0;
-    char            currentDirection = 'd';
-    char            nextDirection    = 'd';
+    vector<Segment> segments = {snakeHead, s1, s2}; // Container for snake
+    int length = 3;
+    int timeStepIterator = 0;
+    char currentDirection = 'd';
+    char nextDirection = 'd';
 
-    initSnake();
     while (!WindowShouldClose())
     {
-
         // Check If Move is Valid
-        if      (IsKeyDown(KEY_W) && currentDirection != 's') nextDirection = 'w';
-        else if (IsKeyDown(KEY_S) && currentDirection != 'w') nextDirection = 's';
-        else if (IsKeyDown(KEY_A) && currentDirection != 'd') nextDirection = 'a';
-        else if (IsKeyDown(KEY_D) && currentDirection != 'a') nextDirection = 'd';
+        if (IsKeyDown(KEY_W) && currentDirection != 's')
+            nextDirection = 'w';
+        else if (IsKeyDown(KEY_S) && currentDirection != 'w')
+            nextDirection = 's';
+        else if (IsKeyDown(KEY_A) && currentDirection != 'd')
+            nextDirection = 'a';
+        else if (IsKeyDown(KEY_D) && currentDirection != 'a')
+            nextDirection = 'd';
 
         // Set Snake Direction
         currentDirection = nextDirection;
@@ -87,15 +86,12 @@ int main()
                 CheckCollisionRecs(sI.rect, sJ.rect);
             gameOver = true;
         }
+
         if (gameOver)
         {
-            BeginDrawing;
-            ClearBackground(RED);
-            EndDrawing;
             segments.clear();
-            segments.push_back(snakeHead);
+            segments = {snakeHead, s1, s2};
             length = 3;
-            gameOver = false;
         }
         render(segments, food);
     }
@@ -107,11 +103,8 @@ void render(std::vector<Segment> &segments, Segment &food)
     BeginDrawing();
     ClearBackground(BLACK);
 
-    for (auto &s : segments) 
-    {
-        s.draw();
-        s.drawOutline();
-    }
+    for (auto &segment : segments)
+        segment.draw();
 
     food.draw();
     EndDrawing();
@@ -166,15 +159,4 @@ void grow(std::vector<Segment> &segments)
     newSegment.color = tail.color;
 
     segments.push_back(newSegment);
-}
-// clang-format on
-
-void initSnake(std::vector<Segment> &segments)
-{
-growSnakeLabel:
-    if (segments.size() < 3)
-    {
-        grow(segments);
-        goto growSnakeLabel;
-    }
 }
