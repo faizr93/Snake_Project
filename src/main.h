@@ -1,2 +1,3 @@
 #pragma once
-void printGrid(char grid[10][10]);
+
+void wrapSnake(std::vector<Segment> &segments, const int GRID_SIZE);

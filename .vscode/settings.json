@@ -64,7 +64,14 @@
 		"variant": "cpp",
 		"map": "cpp",
 		"queue": "cpp",
-		"*.m": "cpp"
+		"*.m": "cpp",
+		"chrono": "cpp",
+		"ratio": "cpp",
+		"iomanip": "cpp",
+		"semaphore": "cpp",
+		"sstream": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp"
 	},
 	"cmake.sourceDirectory": "D:/Project_Files/Snake_Project/include"
 }
