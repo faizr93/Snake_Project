@@ -25,13 +25,14 @@ int main()
     bool gameOver = false;
 
     Segment snakeHead, s1, s2, food;
+    
     snakeHead.rect.SetSize({GRID_SIZE, GRID_SIZE});
     snakeHead.rect.SetPosition(40, 40);
-
     snakeHead.color = GREEN;
-    food.color = RED;
 
     s1 = s2 = food = snakeHead;
+    
+    food.color = RED;
 
     s1.rect.SetPosition({80, 40});
     s2.rect.SetPosition({120, 40});
@@ -69,7 +70,7 @@ int main()
         // Wrap Snake
         wrapSnake(segments, GRID_SIZE);
 
-        if (segments[0].rect.x == food.rect.x || segments[0].rect.y == food.rect.y )
+        if (segments[0].rect.x == food.rect.x && segments[0].rect.y == food.rect.y )
         {
             length++;
             grow(segments);
