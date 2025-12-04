@@ -11,5 +11,3 @@ void moveSnake(char currentDirection, std::vector<Segment> &segments,
 void render(std::vector<Segment> &segments, Segment &food);
 
 void grow(std::vector<Segment> &segments);
-
-void initSnake(std::vector<Segment> &segments);
