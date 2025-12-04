@@ -75,10 +75,9 @@ int main()
             }
         }
 
-        for (auto &sI : snake)
+        for (auto &s : snake)
         {
-            for (auto &sJ : snake)
-                CheckCollisionRecs(sI.rect, sJ.rect);
+            CheckCollisionRecs(s.rect, snake[0].rect);
             gameOver = true;
         }
 
