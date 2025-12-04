@@ -80,11 +80,14 @@ int main()
             }
         }
 
-        for (auto &sI : segments)
+        // Check for self-collision (head with body)
+        for (int i = 1; i < segments.size(); i++)
         {
-            for (auto &sJ : segments)
-                CheckCollisionRecs(sI.rect, sJ.rect);
-            gameOver = true;
+            if (CheckCollisionRecs(segments[0].rect, segments[i].rect))
+            {
+                gameOver = true;
+                break;
+            }
         }
 
         if (gameOver)
