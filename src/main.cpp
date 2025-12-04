@@ -5,10 +5,9 @@ Eat = pushbackTail.
 */
 #include "main.h"
 #include "raylib-cpp.hpp"
-#include "segment.h"
 #include <conio.h>
 #include <iostream>
-
+#include <vector>
 
 using namespace std;
 
@@ -23,23 +22,26 @@ int main()
     SetTargetFPS(75);
 
     const int GRID_SIZE = 40;
-    bool won = false;
+    bool gameOver = false;
 
-    Segment snakeHead, s1, s2;
+    Segment snakeHead, s1, s2, food;
     snakeHead.rect.SetSize({GRID_SIZE, GRID_SIZE});
     snakeHead.rect.SetPosition(40, 40);
 
     snakeHead.color = GREEN;
+    food.color = RED;
 
-    s1 = s2 = snakeHead;
+    s1 = s2 = food = snakeHead;
 
     s1.rect.SetPosition({80, 40});
     s2.rect.SetPosition({120, 40});
+    food.rect.SetPosition({400, 200});
 
     vector<Segment> segments = {snakeHead, s1, s2}; // Container for snake
+    int length = 5;
+    int timeStepIterator = 0;
     char currentDirection = 'd';
     char nextDirection = 'd';
-    int timeStepIterator = 0;
 
     while (!WindowShouldClose())
     {
@@ -59,49 +61,74 @@ int main()
         // Move Head based on Direction, Also move it after Approx fixed time
         if (timeStepIterator % 10 == 0)
         {
-            // Move each segment to the position of the segment before it
-            for (int i = segments.size() - 1; i > 0; i--)
-            {
-                segments[i].rect.SetPosition(
-                    segments[i - 1].rect.GetPosition());
-            }
-
-            switch (currentDirection)
-            {
-            case 'w':
-                segments[0].rect.y -= GRID_SIZE;
-                break;
-            case 'a':
-                segments[0].rect.x -= GRID_SIZE;
-                break;
-            case 's':
-                segments[0].rect.y += GRID_SIZE;
-                break;
-            case 'd':
-                segments[0].rect.x += GRID_SIZE;
-                break;
-            }
+            moveSnake(currentDirection, segments, GRID_SIZE);
         }
+
         timeStepIterator++;
 
         // Wrap Snake
         wrapSnake(segments, GRID_SIZE);
 
+        if (segments[0].rect.x == food.rect.x || segments[0].rect.y == food.rect.y )
+        {
+            length++;
+            grow(segments);
+        foodGeneration:
+            food.rect.x = GetRandomValue(0, 14) * GRID_SIZE;
+            food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
+            for (auto &s : segments)
+            {
+                if(CheckCollisionRecs(s.rect, food.rect)) goto foodGeneration;
+            }
+        }
+
         for (auto &sI : segments)
         {
             for (auto &sJ : segments)
                 CheckCollisionRecs(sI.rect, sJ.rect);
-            won = true;
+            gameOver = true;
         }
 
-        // Rendering Logic
-        BeginDrawing();
-        ClearBackground(BLACK);
+        render(segments,food);
+    }
+}
 
-        for (auto &segment : segments)
-            segment.draw();
+void render(std::vector<Segment> &segments, Segment &food)
+{
+    // Rendering Logic
+    BeginDrawing();
+    ClearBackground(BLACK);
 
-        EndDrawing();
+    for (auto &segment : segments)
+        segment.draw();
+
+    food.draw();
+    EndDrawing();
+}
+
+void moveSnake(char currentDirection, std::vector<Segment> &segments,
+               const int GRID_SIZE)
+{
+    // Move each segment to the position of the segment before it
+    for (int i = segments.size() - 1; i > 0; i--)
+    {
+        segments[i].rect.SetPosition(segments[i - 1].rect.GetPosition());
+    }
+
+    switch (currentDirection)
+    {
+    case 'w':
+        segments[0].rect.y -= GRID_SIZE;
+        break;
+    case 'a':
+        segments[0].rect.x -= GRID_SIZE;
+        break;
+    case 's':
+        segments[0].rect.y += GRID_SIZE;
+        break;
+    case 'd':
+        segments[0].rect.x += GRID_SIZE;
+        break;
     }
 }
 
@@ -115,4 +142,17 @@ void wrapSnake(std::vector<Segment> &segments, const int GRID_SIZE)
         segments[0].rect.x = 600 - GRID_SIZE; // Left wrap
     if (segments[0].rect.y < 0)
         segments[0].rect.y = 600 - GRID_SIZE; // Up wrap
+}
+
+void grow(std::vector<Segment> &segments)
+{
+    Segment newSegment;
+
+    Segment tail = segments.back();
+
+    newSegment.rect.SetSize(tail.rect.GetSize());
+    newSegment.rect.SetPosition(tail.rect.GetPosition());
+    newSegment.color = tail.color;
+
+    segments.push_back(newSegment);
 }
