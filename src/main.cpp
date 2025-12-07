@@ -64,6 +64,23 @@ int main()
                     }
                 }
             }
+
+            if (segments[0].rect.x == food.rect.x &&
+                segments[0].rect.y == food.rect.y)
+            {
+                length++;
+                grow(segments);
+            foodGeneration:
+                food.rect.x = GetRandomValue(0, 14) * GRID_SIZE;
+                food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
+
+                // Regenerate Food if its on Snake Body
+                for (auto &s : segments)
+                {
+                    if (CheckCollisionRecs(s.rect, food.rect))
+                        goto foodGeneration;
+                }
+            }
         }
         // clang-format off
         timeStepIterator++;
@@ -71,23 +88,7 @@ int main()
         // Wrap Snake
         wrapSnake(segments, GRID_SIZE);
 
-        if (segments[0].rect.x == food.rect.x &&
-            segments[0].rect.y == food.rect.y)
-        {
-            length++;
-            grow(segments);
-        foodGeneration:
-            food.rect.x = GetRandomValue(0, 14) * GRID_SIZE;
-            food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
-
-            // Regenerate Food if its on Snake Body
-            for (auto &s : segments)
-            {
-                if (CheckCollisionRecs(s.rect, food.rect))
-                    goto foodGeneration;
-            }
-        }
-
+       
         if (gameOver) std::cout << "Hell";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
         // {
         //     segments.clear();
