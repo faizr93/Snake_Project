@@ -20,10 +20,8 @@ int main()
     char  currentDirection = 'd';
     char  nextDirection    = 'd';
 
-    vector<Segment> snake;
-
-    initSnake(snake, GRID_SIZE);
-    Segment food = initFood(GRID_SIZE, snake);
+    vector<Segment> snake = initSnake(GRID_SIZE);
+    Segment         food  = initFood(GRID_SIZE, snake);
 
     while (!WindowShouldClose())
     {
@@ -55,19 +53,23 @@ int main()
             // Food Collision Check
             if (CheckCollisionRecs(snake[0].rect, food.rect))
             {
-                score++;
-                grow(snake);
+                grow(snake, score);
                 generateNewFood(food, GRID_SIZE, snake);
             }
 
             if (score>highScore) highScore = score;
             
-            if (gameOver) resetGame(snake, food, GRID_SIZE, score, gameOver);
+            if (gameOver)
+            {
+                resetGame(snake, food, GRID_SIZE, score, gameOver);
+                cout << "\n\nHigh Score: " << highScore <<"\n\n";
+            }
 
-            render(snake, food);
         }
-
+        
+        render(snake, food);
         timeStepIterator++;
+
     }
 }
 
@@ -102,16 +104,6 @@ Segment initFood(const int GRID_SIZE, std::vector<Segment> &snake)
     return food;
 }
 
-void resetGame(std::vector<Segment> &snake, Segment &food,
-               int GRID_SIZE, int &score, bool &gameOver)
-{
-    snake = initSnake(GRID_SIZE);
-    food  = initFood(GRID_SIZE, snake);
-
-    score    = 0;
-    gameOver = false;
-}
-
 void generateNewFood(Segment &food, const int GRID_SIZE,
                      std::vector<Segment> &snake)
 {
@@ -127,18 +119,6 @@ foodGeneration:
     }
 }
 
-void render(std::vector<Segment> &snake, Segment &food)
-{
-    // Rendering Logic
-    BeginDrawing();
-    ClearBackground(BLACK);
-
-    for (auto &segment : snake)
-        segment.draw();
-
-    food.draw();
-    EndDrawing();
-}
 
 void moveSnake(char currentDirection, std::vector<Segment> &snake,
                const int GRID_SIZE)
@@ -171,8 +151,33 @@ void wrapSnake(std::vector<Segment> &snake, const int GRID_SIZE)
     if (snake[0].rect.y < 0)               snake[0].rect.y = 600 - GRID_SIZE; // Up wrap
 }
 
-void grow(std::vector<Segment> &snake)
+void grow(std::vector<Segment> &snake, int &score)
 {
+    score++;
     Segment newSegment = snake.back();
     snake.push_back(newSegment);
+    cout << "\n\nScore: " << score;
+}
+
+void render(std::vector<Segment> &snake, Segment &food)
+{
+    // Rendering Logic
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    for (auto &segment : snake)
+        segment.draw();
+
+    food.draw();
+    EndDrawing();
+}
+
+void resetGame(std::vector<Segment> &snake, Segment &food,
+               int GRID_SIZE, int &score, bool &gameOver)
+{
+    snake = initSnake(GRID_SIZE);
+    food  = initFood(GRID_SIZE, snake);
+
+    score    = 0;
+    gameOver = false;
 }
