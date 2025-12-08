@@ -8,8 +8,9 @@ using namespace std;
 
 int main()
 {
-    raylib::Window snakeWindow(600, 600, "Snake", FLAG_VSYNC_HINT);
+    raylib::Window snakeWindow(600, 640, "Snake", FLAG_VSYNC_HINT);
     SetTargetFPS(75);
+    system("cls");
 
     // clang-format off
     const int GRID_SIZE    = 40;
@@ -22,54 +23,64 @@ int main()
 
     vector<Segment> snake = initSnake(GRID_SIZE);
     Segment         food  = initFood(GRID_SIZE, snake);
-
+    
     while (!WindowShouldClose())
-    {
+    {       
+        // clang-format off
         // Check If Move is Valid
         if      (IsKeyDown(KEY_W) && currentDirection != 's') nextDirection = 'w';
         else if (IsKeyDown(KEY_S) && currentDirection != 'w') nextDirection = 's';
         else if (IsKeyDown(KEY_A) && currentDirection != 'd') nextDirection = 'a';
         else if (IsKeyDown(KEY_D) && currentDirection != 'a') nextDirection = 'd';
-
+        // clang-format on
         // Move Head based on Direction, Also move it after Approx fixed time
         if (timeStepIterator % 10 == 0)
         {
             // Set Snake Direction
             currentDirection = nextDirection;
 
-            moveSnake(currentDirection,snake,GRID_SIZE);
+            moveSnake(currentDirection, snake, GRID_SIZE);
             wrapSnake(snake, GRID_SIZE);
 
-            // Self-Collision Check
-            for (int i = 1; i < snake.size(); i++)
-            {
-                if (CheckCollisionRecs(snake[0].rect, snake[i].rect))
-                {
-                    gameOver = true;
-                    break;
-                }
-            }
-            
-            // Food Collision Check
-            if (CheckCollisionRecs(snake[0].rect, food.rect))
-            {
-                grow(snake, score);
-                generateNewFood(food, GRID_SIZE, snake);
-            }
+            checkSelfCollision(snake, gameOver);
+            checkFoodCollision(snake, food, score, GRID_SIZE);
 
-            if (score>highScore) highScore = score;
-            
+            if (score > highScore)
+                highScore = score;
+
             if (gameOver)
             {
-                resetGame(snake, food, GRID_SIZE, score, gameOver);
-                cout << "\n\nHigh Score: " << highScore <<"\n\n";
+                resetGame(snake, food, GRID_SIZE, score, gameOver,
+                          timeStepIterator, currentDirection, nextDirection);
             }
-
         }
-        
-        render(snake, food);
-        timeStepIterator++;
 
+        render(snake, food, score, highScore);
+        timeStepIterator++;
+    }
+}
+
+void checkFoodCollision(std::vector<Segment> &snake, Segment &food, int &score,
+                        const int GRID_SIZE)
+{
+    // Food Collision Check
+    if (CheckCollisionRecs(snake[0].rect, food.rect))
+    {
+        grow(snake, score);
+        generateNewFood(food, GRID_SIZE, snake);
+    }
+}
+
+void checkSelfCollision(std::vector<Segment> &snake, bool &gameOver)
+{
+    // Self-Collision Check
+    for (int i = 1; i < snake.size(); i++)
+    {
+        if (CheckCollisionRecs(snake[0].rect, snake[i].rect))
+        {
+            gameOver = true;
+            break;
+        }
     }
 }
 
@@ -88,6 +99,8 @@ vector<Segment> initSnake(const int GRID_SIZE)
 
     s1.rect.SetPosition(80, GRID_SIZE);
     s2.rect.SetPosition(40, GRID_SIZE);
+
+    snakeHead.color = DARKGREEN;
 
     snake = {snakeHead, s1, s2};
     return snake;
@@ -119,13 +132,13 @@ foodGeneration:
     }
 }
 
-
 void moveSnake(char currentDirection, std::vector<Segment> &snake,
                const int GRID_SIZE)
 {
     Segment temp = snake[0];
 
     // Move Head
+    // clang-format off
     switch (currentDirection)
     {
     case 'w': snake[0].rect.y -= GRID_SIZE; break;
@@ -133,7 +146,7 @@ void moveSnake(char currentDirection, std::vector<Segment> &snake,
     case 's': snake[0].rect.y += GRID_SIZE; break;
     case 'd': snake[0].rect.x += GRID_SIZE; break;
     }
-
+    // clang-format on
     // Move Body
     for (int i = 1; i < snake.size(); i++)
     {
@@ -145,10 +158,14 @@ void moveSnake(char currentDirection, std::vector<Segment> &snake,
 
 void wrapSnake(std::vector<Segment> &snake, const int GRID_SIZE)
 {
-    if (snake[0].rect.x > 600 - GRID_SIZE) snake[0].rect.x = 0;               // Right wrap
-    if (snake[0].rect.y > 600 - GRID_SIZE) snake[0].rect.y = 0;               // Down wrap
-    if (snake[0].rect.x < 0)               snake[0].rect.x = 600 - GRID_SIZE; // Left wrap
-    if (snake[0].rect.y < 0)               snake[0].rect.y = 600 - GRID_SIZE; // Up wrap
+    if (snake[0].rect.x > 600 - GRID_SIZE)
+        snake[0].rect.x = 0; // Right wrap
+    if (snake[0].rect.y > 600 - GRID_SIZE)
+        snake[0].rect.y = 0; // Down wrap
+    if (snake[0].rect.x < 0)
+        snake[0].rect.x = 600 - GRID_SIZE; // Left wrap
+    if (snake[0].rect.y < 0)
+        snake[0].rect.y = 600 - GRID_SIZE; // Up wrap
 }
 
 void grow(std::vector<Segment> &snake, int &score)
@@ -156,28 +173,41 @@ void grow(std::vector<Segment> &snake, int &score)
     score++;
     Segment newSegment = snake.back();
     snake.push_back(newSegment);
-    cout << "\n\nScore: " << score;
 }
 
-void render(std::vector<Segment> &snake, Segment &food)
+void render(std::vector<Segment> &snake, Segment &food, int &score,
+            int &highScore)
 {
     // Rendering Logic
     BeginDrawing();
     ClearBackground(BLACK);
 
     for (auto &segment : snake)
+    {
         segment.draw();
+        segment.rect.DrawLines(BLACK, 2);
+    }
 
+    DrawText(TextFormat("Score: %d", score), 20, 605, 30, WHITE);
+    DrawText(TextFormat("High Score: %d", highScore), 375, 605, 30, WHITE);
+
+    DrawRectangleLinesEx({0,0,600,600},5,DARKGRAY);
+    
     food.draw();
     EndDrawing();
 }
 
-void resetGame(std::vector<Segment> &snake, Segment &food,
-               int GRID_SIZE, int &score, bool &gameOver)
+void resetGame(std::vector<Segment> &snake, Segment &food, int GRID_SIZE,
+               int &score, bool &gameOver, int &timeStepIterator,
+               char &currentDirection, char &nextDirection)
 {
     snake = initSnake(GRID_SIZE);
-    food  = initFood(GRID_SIZE, snake);
+    food = initFood(GRID_SIZE, snake);
 
-    score    = 0;
+    score = 0;
     gameOver = false;
+    timeStepIterator = 0;
+
+    currentDirection = 'd';
+    nextDirection = 'd';
 }
