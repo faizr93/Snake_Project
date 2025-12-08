@@ -10,7 +10,7 @@ int main()
 {
     raylib::Window snakeWindow(600, 640, "Snake", FLAG_VSYNC_HINT);
     SetTargetFPS(75);
-    system("cls");
+    InitAudioDevice();
 
     // clang-format off
     const int GRID_SIZE    = 40;
@@ -21,8 +21,9 @@ int main()
     char  currentDirection = 'd';
     char  nextDirection    = 'd';
 
-    vector<Segment> snake = initSnake(GRID_SIZE);
-    Segment         food  = initFood(GRID_SIZE, snake);
+    vector<Segment> snake    = initSnake(GRID_SIZE);
+    Segment         food     = initFood(GRID_SIZE, snake);
+    Sound           eatSound = LoadSound("effect.mp3");
     
     while (!WindowShouldClose())
     {       
@@ -38,7 +39,8 @@ int main()
         {
             // Set Snake Direction
             currentDirection = nextDirection;
-
+            
+        
             moveSnake(currentDirection, snake, GRID_SIZE);
             wrapSnake(snake, GRID_SIZE);
 
@@ -50,6 +52,7 @@ int main()
 
             if (gameOver)
             {
+                PlaySound(eatSound);
                 resetGame(snake, food, GRID_SIZE, score, gameOver,
                           timeStepIterator, currentDirection, nextDirection);
             }
@@ -146,7 +149,7 @@ void moveSnake(char currentDirection, std::vector<Segment> &snake,
     case 's': snake[0].rect.y += GRID_SIZE; break;
     case 'd': snake[0].rect.x += GRID_SIZE; break;
     }
-    // clang-format on
+
     // Move Body
     for (int i = 1; i < snake.size(); i++)
     {
