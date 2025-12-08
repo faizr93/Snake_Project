@@ -8,33 +8,21 @@ using namespace std;
 
 int main()
 {
-    raylib::Window snake(600, 600, "Snake", FLAG_VSYNC_HINT);
+    raylib::Window snakeWindow(600, 600, "Snake", FLAG_VSYNC_HINT);
     SetTargetFPS(75);
 
-    const int GRID_SIZE = 40;
-    bool gameOver = false;
-    bool snakeIsGrowing = false;
-
-    Segment snakeHead, s1, s2, food;
-
-    snakeHead.rect.SetSize({GRID_SIZE, GRID_SIZE});
-    snakeHead.rect.SetPosition(40, 40);
-    snakeHead.color = GREEN;
-
-    s1 = s2 = food = snakeHead;
-
-    food.color = RED;
-
-    s1.rect.SetPosition({80, 40});
-    s2.rect.SetPosition({120, 40});
-    food.rect.SetPosition({400, 200});
-
     // clang-format off
-    vector<Segment> segments         = {snakeHead, s1, s2};  // Container for snake
-    int             length           =  3 ;
-    int             timeStepIterator =  0 ;
-    char            currentDirection = 'd';
-    char            nextDirection    = 'd';
+    const int GRID_SIZE    = 40;
+    bool  gameOver         = false;
+    int   snakeLength      = 3;
+    int   timeStepIterator = 0;
+    char  currentDirection = 'd';
+    char  nextDirection    = 'd';
+
+    vector<Segment> snake;
+
+    initSnake(snake, GRID_SIZE);
+    Segment food = initFood(GRID_SIZE, snake);
 
     while (!WindowShouldClose())
     {
@@ -43,109 +31,153 @@ int main()
         else if (IsKeyDown(KEY_S) && currentDirection != 'w') nextDirection = 's';
         else if (IsKeyDown(KEY_A) && currentDirection != 'd') nextDirection = 'a';
         else if (IsKeyDown(KEY_D) && currentDirection != 'a') nextDirection = 'd';
-        // clang-format on
-        // Set Snake Direction
-        currentDirection = nextDirection;
 
         // Move Head based on Direction, Also move it after Approx fixed time
         if (timeStepIterator % 10 == 0)
         {
-            moveSnake(currentDirection, segments, GRID_SIZE);
+            // Set Snake Direction
+            currentDirection = nextDirection;
 
-            // Check for Self-Collision (head with body)
-            for (int i = 1; i < segments.size(); i++)
+            moveSnake(currentDirection,snake,GRID_SIZE);
+            wrapSnake(snake, GRID_SIZE);
+
+            // Self-Collision Check
+            for (int i = 1; i < snake.size(); i++)
             {
-                if (!snakeIsGrowing)
+                if ((snake[0].rect.x == snake[i].rect.x) &&
+                    (snake[0].rect.y == snake[i].rect.y))
                 {
-                    if (CheckCollisionRecs(segments[0].rect, segments[i].rect))
-                    {
-                        gameOver = true;
-                        break;
-                    }
+                    gameOver = true;
+                    break;
                 }
             }
 
-            if (segments[0].rect.x == food.rect.x &&
-                segments[0].rect.y == food.rect.y)
+            if (foodCollision(snake, food))
             {
-                length++;
-                grow(segments);
-            foodGeneration:
-                food.rect.x = GetRandomValue(0, 14) * GRID_SIZE;
-                food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
-
-                // Regenerate Food if its on Snake Body
-                for (auto &s : segments)
-                {
-                    if (CheckCollisionRecs(s.rect, food.rect))
-                        goto foodGeneration;
-                }
+                snakeLength++;
+                grow(snake);
+                generateNewFood(food, GRID_SIZE, snake);
             }
         }
-        // clang-format off
         timeStepIterator++;
+        // clang-format off
+        if (gameOver)
+        {
+            resetGame(snake, food, GRID_SIZE, snakeLength, gameOver);
+        }
 
-        // Wrap Snake
-        wrapSnake(segments, GRID_SIZE);
-
-       
-        if (gameOver) std::cout << "Hell";                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-        // {
-        //     segments.clear();
-        //     segments = {snakeHead, s1, s2};
-        //     length   = 3;
-        // }
-        
-        render(segments, food);
+        // clang-format off
+        render(snake, food);
     }
 }
 
-void render(std::vector<Segment> &segments, Segment &food)
+vector<Segment> initSnake(const int GRID_SIZE)
+{
+    vector<Segment> snake;
+
+    Segment snakeHead, s1, s2;
+
+    snakeHead.rect.SetPosition(120, GRID_SIZE);
+    snakeHead.rect.SetSize(GRID_SIZE, GRID_SIZE);
+    snakeHead.color = GREEN;
+
+    s1 = snakeHead;
+    s2 = snakeHead;
+
+    s1.rect.SetPosition(80, GRID_SIZE);
+    s2.rect.SetPosition(40, GRID_SIZE);
+
+    snake = {snakeHead, s1, s2};
+    return snake;
+}
+
+Segment initFood(const int GRID_SIZE, std::vector<Segment> &snake)
+{
+    Segment food;
+    food.rect.SetSize(GRID_SIZE, GRID_SIZE);
+    food.color = RED;
+
+    generateNewFood(food, GRID_SIZE, snake);
+
+    return food;
+}
+
+void resetGame(std::vector<Segment> &snake, Segment &food,
+               int GRID_SIZE, int &score, bool &gameOver)
+{
+    snake = initSnake(GRID_SIZE);
+    food  = initFood(GRID_SIZE, snake);
+
+    score    = 0;
+    gameOver = false;
+}
+
+bool foodCollision(std::vector<Segment> &snake, Segment &food)
+{
+    return snake[0].rect.x == food.rect.x && snake[0].rect.y == food.rect.y;
+}
+
+void generateNewFood(Segment &food, const int GRID_SIZE,
+                     std::vector<Segment> &snake)
+{
+foodGeneration:
+    food.rect.x = GetRandomValue(0, 14) * GRID_SIZE;
+    food.rect.y = GetRandomValue(0, 14) * GRID_SIZE;
+
+    // Regenerate Food if its on Snake Body
+    for (auto &s : snake)
+    {
+        if (CheckCollisionRecs(s.rect, food.rect))
+            goto foodGeneration;
+    }
+}
+
+void render(std::vector<Segment> &snake, Segment &food)
 {
     // Rendering Logic
     BeginDrawing();
     ClearBackground(BLACK);
 
-    for (auto &segment : segments)
+    for (auto &segment : snake)
         segment.draw();
 
     food.draw();
     EndDrawing();
 }
 
-void moveSnake(char currentDirection, std::vector<Segment> &segments,
+void moveSnake(char currentDirection, std::vector<Segment> &snake,
                const int GRID_SIZE)
 {
-    Segment temp = segments[0];
+    Segment temp = snake[0];
 
-    // Move SnakeHead
+    // Move Head
     switch (currentDirection)
     {
-    case 'w': segments[0].rect.y -= GRID_SIZE; break;
-    case 'a': segments[0].rect.x -= GRID_SIZE; break;
-    case 's': segments[0].rect.y += GRID_SIZE; break;
-    case 'd': segments[0].rect.x += GRID_SIZE; break;
+    case 'w': snake[0].rect.y -= GRID_SIZE; break;
+    case 'a': snake[0].rect.x -= GRID_SIZE; break;
+    case 's': snake[0].rect.y += GRID_SIZE; break;
+    case 'd': snake[0].rect.x += GRID_SIZE; break;
     }
 
     // Move Body
-    for (int i = 1; i < segments.size(); i++)
+    for (int i = 1; i < snake.size(); i++)
     {
-        Segment nextTemp = segments[i];                        
-        segments[i].rect.SetPosition(temp.rect.GetPosition()); 
-        temp = nextTemp;                                       
+        Segment nextTemp = snake[i];
+        snake[i].rect.SetPosition(temp.rect.GetPosition());
+        temp = nextTemp;
     }
 }
 
-void wrapSnake(std::vector<Segment> &segments, const int GRID_SIZE)
+void wrapSnake(std::vector<Segment> &snake, const int GRID_SIZE)
 {
-    if (segments[0].rect.x > 600 - GRID_SIZE) segments[0].rect.x = 0;               // Right wrap
-    if (segments[0].rect.y > 600 - GRID_SIZE) segments[0].rect.y = 0;               // Down wrap
-    if (segments[0].rect.x < 0)               segments[0].rect.x = 600 - GRID_SIZE; // Left wrap
-    if (segments[0].rect.y < 0)               segments[0].rect.y = 600 - GRID_SIZE; // Up wrap
+    if (snake[0].rect.x > 600 - GRID_SIZE) snake[0].rect.x = 0;               // Right wrap
+    if (snake[0].rect.y > 600 - GRID_SIZE) snake[0].rect.y = 0;               // Down wrap
+    if (snake[0].rect.x < 0)               snake[0].rect.x = 600 - GRID_SIZE; // Left wrap
+    if (snake[0].rect.y < 0)               snake[0].rect.y = 600 - GRID_SIZE; // Up wrap
 }
 
-void grow(std::vector<Segment> &segments)
+void grow(std::vector<Segment> &snake)
 {
-    Segment newSegment = segments.back();
-    segments.push_back(newSegment);
+    Segment newSegment = snake.back();
+    snake.push_back(newSegment);
 }
