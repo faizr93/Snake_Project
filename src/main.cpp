@@ -14,7 +14,8 @@ int main()
     // clang-format off
     const int GRID_SIZE    = 40;
     bool  gameOver         = false;
-    int   snakeLength      = 3;
+    int   score            = 0;
+    int   highScore        = 0;
     int   timeStepIterator = 0;
     char  currentDirection = 'd';
     char  nextDirection    = 'd';
@@ -44,30 +45,29 @@ int main()
             // Self-Collision Check
             for (int i = 1; i < snake.size(); i++)
             {
-                if ((snake[0].rect.x == snake[i].rect.x) &&
-                    (snake[0].rect.y == snake[i].rect.y))
+                if (CheckCollisionRecs(snake[0].rect, snake[i].rect))
                 {
                     gameOver = true;
                     break;
                 }
             }
-
-            if (foodCollision(snake, food))
+            
+            // Food Collision Check
+            if (CheckCollisionRecs(snake[0].rect, food.rect))
             {
-                snakeLength++;
+                score++;
                 grow(snake);
                 generateNewFood(food, GRID_SIZE, snake);
             }
-        }
-        timeStepIterator++;
-        // clang-format off
-        if (gameOver)
-        {
-            resetGame(snake, food, GRID_SIZE, snakeLength, gameOver);
+
+            if (score>highScore) highScore = score;
+            
+            if (gameOver) resetGame(snake, food, GRID_SIZE, score, gameOver);
+
+            render(snake, food);
         }
 
-        // clang-format off
-        render(snake, food);
+        timeStepIterator++;
     }
 }
 
@@ -110,11 +110,6 @@ void resetGame(std::vector<Segment> &snake, Segment &food,
 
     score    = 0;
     gameOver = false;
-}
-
-bool foodCollision(std::vector<Segment> &snake, Segment &food)
-{
-    return snake[0].rect.x == food.rect.x && snake[0].rect.y == food.rect.y;
 }
 
 void generateNewFood(Segment &food, const int GRID_SIZE,
