@@ -12,7 +12,6 @@ int main()
     SetTargetFPS(75);
     InitAudioDevice();
 
-    // clang-format off
     const int GRID_SIZE    = 40;
     bool  gameOver         = false;
     int   score            = 0;
@@ -27,13 +26,13 @@ int main()
     
     while (!WindowShouldClose())
     {       
-        // clang-format off
+
         // Check If Move is Valid
         if      (IsKeyDown(KEY_W) && currentDirection != 's') nextDirection = 'w';
         else if (IsKeyDown(KEY_S) && currentDirection != 'w') nextDirection = 's';
         else if (IsKeyDown(KEY_A) && currentDirection != 'd') nextDirection = 'a';
         else if (IsKeyDown(KEY_D) && currentDirection != 'a') nextDirection = 'd';
-        // clang-format on
+        
         // Move Head based on Direction, Also move it after Approx fixed time
         if (timeStepIterator % 10 == 0)
         {
@@ -141,7 +140,6 @@ void moveSnake(char currentDirection, std::vector<Segment> &snake,
     Segment temp = snake[0];
 
     // Move Head
-    // clang-format off
     switch (currentDirection)
     {
     case 'w': snake[0].rect.y -= GRID_SIZE; break;
@@ -188,15 +186,15 @@ void render(std::vector<Segment> &snake, Segment &food, int &score,
     for (auto &segment : snake)
     {
         segment.draw();
-        segment.rect.DrawLines(BLACK, 2);
+        segment.rect.DrawLines(BLACK, 2); // Outline
     }
 
     DrawText(TextFormat("Score: %d", score), 20, 605, 30, WHITE);
     DrawText(TextFormat("High Score: %d", highScore), 375, 605, 30, WHITE);
 
-    DrawRectangleLinesEx({0,0,600,600},5,DARKGRAY);
-    
     food.draw();
+    
+    DrawRectangleLinesEx({0,0,600,600},5,DARKGRAY);
     EndDrawing();
 }
 
