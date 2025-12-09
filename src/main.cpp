@@ -23,7 +23,7 @@ int main()
 
     vector<Segment> snake    = initSnake(GRID_SIZE);
     Segment         food     = initFood(GRID_SIZE, snake);
-    Sound           eatSound = LoadSound("effect.mp3");
+    Sound           dieSound = LoadSound("effect.mp3");
     
     while (!WindowShouldClose())
     {       
@@ -52,7 +52,7 @@ int main()
 
             if (gameOver)
             {
-                PlaySound(eatSound);
+                PlaySound(dieSound);
                 resetGame(snake, food, GRID_SIZE, score, gameOver,
                           timeStepIterator, currentDirection, nextDirection);
             }
