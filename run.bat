@@ -1,3 +1,4 @@
-cd D:\Project_Files\Snake_Project_PF\bin\Debug
-Snake_Project_PF.exe
-cd D:\Project_Files\Snake_Project_PF
+make
+cd D:\Coding-Projects\Graphic-Engine-Raylib\bin\Debug
+Graphic-Engine-Raylib.exe
+cd D:\Coding-Projects\Graphic-Engine-Raylib

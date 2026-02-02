@@ -1,7 +1,7 @@
 # Snake Game by Faiz
-A Snake game made via raylib quickstart in C++
+A very simple graphic engine made in C++ raylib
 ## Supported Platforms
-Quickstart/This game supports the main 3 desktop platforms:
+Quickstart/This software supports the main 3 desktop platforms:
 * Windows
 * Linux
 * MacOS
