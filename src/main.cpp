@@ -39,7 +39,7 @@ int main()
         for (auto &p : cube)
         {
             p.x += 0.05;
-            Renderer::render(cube, edges);
+            Renderer::renderShape(cube, edges);
         }
 
         EndDrawing();

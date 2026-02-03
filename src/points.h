@@ -1,13 +1,13 @@
 #pragma once
 #include "globals.h"
 
-class Point2D
+struct Point2D
 {
   public:
     float x, y;
 };
 
-class Point3D
+struct Point3D
 {
   public:
     float x, y, z;
