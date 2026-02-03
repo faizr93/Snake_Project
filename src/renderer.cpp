@@ -27,7 +27,8 @@ Point2D Renderer::convert2D(Point3D &p)
 }
 
 /*
-- Converts 3D point to 2D, transforms to cartesian plane and draws it on screen
+- Converts 3D point to 2D
+- Transforms to cartesian plane and draws it on screen
 */
 void Renderer::render(Point3D p3D)
 {
@@ -39,5 +40,4 @@ void Renderer::render(Point3D p3D)
                   RED); // Render to screen
 }
 
-Renderer::Renderer() { focal = 200.f; 
-}
+float Renderer::focal = 200.f;

@@ -11,17 +11,10 @@ int main()
     raylib::Window graphicWindow(600, 600, "Graphic Render", FLAG_VSYNC_HINT);
     SetTargetFPS(75);
 
-    Point3D a3D(300, 0, 1);
-    Point3D b3D(-300, 0, 1);
-    Point3D c3D(0, 300, 1);
-    Point3D d3D(0, -300, 1);
+    float h = 100.f; // Distance from Center {0,0,0} of the cube's faces, Used to create symmetric cube
+    vector<Point3D> cube = {{-h, -h, -h}, {h, -h, -h}, {h, h, -h}, {-h, h, -h},
+                            {-h, -h, h},  {h, -h, h},  {h, h, h},  {-h, h, h}};
 
-    Point3D e3D(300, 0, 10);
-    Point3D f3D(-300, 0, 10);
-    Point3D g3D(0, 300, 10);
-    Point3D h3D(0, -300, 10);
-
-    vector<Point3D> points3D = {a3D, b3D, c3D, d3D, e3D, f3D, g3D, h3D};
     vector<Point2D> points2D;
 
     while (!WindowShouldClose())
@@ -29,9 +22,9 @@ int main()
         BeginDrawing();
         ClearBackground(BLACK);
 
-        for (auto &p : points3D)
+        for (auto &p : cube)
         {
-            p.z+=0.01;
+            p.x += 0.01;
             Renderer::render(p);
         }
 
