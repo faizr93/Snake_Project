@@ -11,33 +11,41 @@
 Point2D Renderer::transformCartesian(Point2D p)
 {
     p.y = -p.y;
-    p.x += (GetScreenWidth() - POINT_SIZE) / 2;
+    p.x += (GetScreenWidth()  - POINT_SIZE) / 2;
     p.y += (GetScreenHeight() - POINT_SIZE) / 2;
 
     return {p.x, p.y};
 }
 
 // Project the 3d Point onto the 2d screen, Return projected point
-Point2D Renderer::convert2D(Point3D &p)
+Point2D Renderer::project2D(Point3D &p)
 {
     p.z = p.z == 0 ? 1 : p.z;
+
     float x = p.x / p.z * focal;
     float y = p.y / p.z * focal;
+
     return {x, y};
 }
 
 /*
 - Converts 3D point to 2D
-- Transforms to cartesian plane and draws it on screen
+- Transforms to cartesian plane
+- Draws the points and their connections/edges on screen
 */
-void Renderer::render(Point3D p3D)
+void Renderer::render(Shape shape, Connections connections)
 {
-    Point2D p2D = convert2D(p3D);       // Convert from 3d to 2d
-    p2D = transformCartesian(p2D);      // Translate to cartesian plane
-    p2D = {round(p2D.x), round(p2D.y)}; // Clean of floating point errors
+    // clang-format off
+    for (auto &p3D : shape)
+    {
+        Point2D p2D = project2D(p3D);                // Convert from 3d to 2d
+                p2D = transformCartesian(p2D);       // Translate to cartesian plane
+                p2D = {round(p2D.x), round(p2D.y)};  // Fix floating point errors
 
-    DrawRectangle(p2D.x, p2D.y, POINT_SIZE, POINT_SIZE,
-                  RED); // Render to screen
+        raylib::Rectangle rect = {p2D.x, p2D.y, POINT_SIZE, POINT_SIZE}; // Turn point into renderable rectangle
+        rect.Draw(RED); // Render to screen
+    }
+    // clang-format on
 }
 
 float Renderer::focal = 200.f;

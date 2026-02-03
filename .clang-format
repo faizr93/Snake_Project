@@ -1,3 +1,5 @@
 IndentWidth: 4
 BreakBeforeBraces: Allman
 ReflowComments: false
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: true
