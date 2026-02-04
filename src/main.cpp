@@ -1,5 +1,5 @@
-#include "points.h"
 #include "raylib-cpp.hpp"
+#include "controller.h"
 #include "renderer.h"
 #include <iostream>
 #include <vector>
@@ -25,14 +25,19 @@ int main()
         {0, 4}, {1, 5}, {2, 6}, {3, 7}  // connecting edges
     };
 
+    // create a copy of original world to turn into camera view #TODO make this automatic in render pipeline
     World world;
     world.shapes.push_back(cube);
-    Renderer::pushWorldIntoView(world, 600);// Temp function
+
+    World worldToRender = world; 
     
     while (!WindowShouldClose())
     {
-        Renderer::handleInput();
-        Renderer::render(world);
+        worldToRender = world;
+        Renderer::pushWorldIntoView(worldToRender, 600);// Temp function
+        Controller::handleInput(worldToRender);
+        Renderer::render(worldToRender);
     }
     return 0;
 }
+

@@ -1,14 +1,14 @@
 #include "shape.h"
 #include "raylib-cpp.hpp"
 
-void Shape::move(const Point3D &delta) 
+void Shape::move(const raylib::Vector3 &delta) 
 {
     position.x += delta.x;
     position.y += delta.y;
     position.z += delta.z;
 }
 
-void Shape::rotate(const Point3D &delta) 
+void Shape::rotate(const raylib::Vector3 &delta) 
 {
     rotation.x += delta.x;
     rotation.y += delta.y;

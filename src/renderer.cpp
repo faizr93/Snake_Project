@@ -1,6 +1,5 @@
 #include "renderer.h"
 #include "globals.h"
-#include "points.h"
 #include "raylib-cpp.hpp"
 
 // clang-format off
@@ -8,7 +7,7 @@
 - Inverts Y axis around the origin
 - Centers origin on 0,0
 */
-void Renderer::transformPoint(Point3D &p)
+void Renderer::transformPoint(raylib::Vector3 &p)
 {
     p.y = -p.y;
     p.x += (GetScreenWidth()  - POINT_SIZE) / 2;
@@ -18,7 +17,7 @@ void Renderer::transformPoint(Point3D &p)
 /* 
 - Project the 3D Point onto the 2D screen
 */
-void Renderer::projectPoint(Point3D &p)
+void Renderer::projectPoint(raylib::Vector3 &p)
 {
     p.z = p.z == 0 ? 1 : p.z;
 
@@ -32,14 +31,14 @@ void Renderer::projectPoint(Point3D &p)
 - Projects 3D point to 2D
 - Transforms to cartesian plane
 */
-void Renderer::preparePoint(Point3D &p)
+void Renderer::preparePoint(raylib::Vector3 &p)
 {
     projectPoint(p);              // Convert from 3D to 2D
     transformPoint(p);            // Translate to cartesiasn plane
 }
 
 // Render the 2D point on screen in given Color
-void Renderer::drawPoint(Point2D &p, Color color)
+void Renderer::drawPoint(raylib::Vector3 &p, Color color)
 {
     // Turn point into renderable rectangles with size
     raylib::Rectangle rect = {p.x, p.y, POINT_SIZE, POINT_SIZE};  
@@ -53,6 +52,7 @@ void Renderer::transformShape(Shape &shape)
     // Transform ={scale,translate,rotate}, project, render
 
     // Move
+    
     for (auto &point : shape.vertices)
     {
         point.x += shape.position.x;
@@ -76,11 +76,13 @@ void Renderer::drawShape(Shape &shape)
 {
     for(auto &edge: shape.edges) 
     {
-        Point3D A = shape.vertices[edge.first];
-        Point3D B = shape.vertices[edge.second];
+        raylib::Vector3 A = shape.vertices[edge.first];
+        raylib::Vector3 B = shape.vertices[edge.second];
 
         float offset = POINT_SIZE/2;
         DrawLine(A.x+offset, A.y+offset, B.x+offset, B.y+offset, edge.color);  // Render Edge
+        drawPoint(A,RED);
+        drawPoint(B,RED);
     }
 }
 
@@ -88,6 +90,7 @@ void Renderer::transformWorld(World &world)
 {
     for (auto &shape : world.shapes)
     {
+        // shape.move({camDx,camDy,camDy});
         transformShape(shape);
     }
 }
@@ -114,27 +117,12 @@ void Renderer::drawWorld(World &world)
     EndDrawing();
 }
 
-// Check key presses, decide movement #TODO make camera movement and shape movement input seperate
-void Renderer::handleInput()
-{
-    // By default do no movement
-    dx = dy = 0;
-
-    // Return if no key pressed
-    if (GetKeyPressed() == 0) return; 
-    
-    // Decide change in x or y based on input
-    if (IsKeyDown(KEY_W)) dy += 1;
-    if (IsKeyDown(KEY_S)) dy -= 1;
-    if (IsKeyDown(KEY_A)) dx -= 1;
-    if (IsKeyDown(KEY_D)) dx += 1;
-}
-
 /*
 - Transforms
 - Projects
+- Prepares world for rendering to 2D screen
 */
-void Renderer::update(World &world)
+void Renderer::prepareWorld(World &world)
 {
     transformWorld(world);
     projectWorld(world);    
@@ -154,11 +142,10 @@ void Renderer::pushWorldIntoView(World &world, int amount)
 // Render world via render pipeline, Transform->Project->Draw
 void Renderer::render(World &world)
 {
-    update   (world);  // Transform, Project, and Input
+    prepareWorld(world);     // Transform, Project, and Input
     drawWorld(world);  // Draw to screen
 }
 
 // clang-format on
 float Renderer::focal = 500.f;
-float Renderer::dx    = 0;
-float Renderer::dy    = 0;
+bool moveMode = 0;
