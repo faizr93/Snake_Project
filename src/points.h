@@ -12,5 +12,5 @@ struct Point3D
   public:
     float x, y, z;
 
-    Point3D(int x, int y, int z) : x(x), y(y), z(z) {};
+    Point3D(float x, float y, float z) : x(x), y(y), z(z) {};
 };

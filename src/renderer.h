@@ -3,27 +3,37 @@
 #include "globals.h"
 #include "points.h"
 #include "raylib-cpp.hpp"
+#include "world.h"
 
 class Renderer
 {
   public:
     static float focal;
-    static int dx;
-    static int dy;
-
+    static float dx;
+    static float dy;
+    static World renderedWorld; 
     // clang-format off
-    using Shape       = std::vector<Point3D>; // All points of the shape
-    using Edge        = std::pair<int, int>;  // Indices of two Points to connect i.e Edge of shape
-    using Connections = std::vector<Edge>;    // All connections of shape i.e All edges or All connections of points
 
-    static Point2D project(Point3D &p3D);                          // Project 3d Point on 2d screen
-    static Point2D transformCartesian(Point2D &p2D);               // Convert point to cartesian plane, so projection is accurate
-    static Point2D preparePoint(Point3D &p3D);                     // Projects and transforms a 3D point
+    static void transformPoint(Point3D &p);          // Convert point to cartesian plane, so projection is accurate
+    static void projectPoint(Point3D &p);            // Project 3D Point on 2d screen
+    static void preparePoint(Point3D &p);            // Projects and transforms a 3D point
+    static void drawPoint(Point2D &p2D, Color color);  // Renders point on 2d screen's cartesian plane
+    
+    static void transformShape(Shape &shape);  // Rotate, Scale, Translate shape in 3D space
+    static void projectShape(Shape &shape);    // Project 3D shape on 2D screen's cartesian plane
+    static void drawShape(Shape &shape);       // Renders 3D shape on 2D screen's cartesian plane
+    
+    static void transformWorld(World &world);  // Rotate, Scale, Translate shapes of world in 3D space
+    static void projectWorld(World &world);    // Project 3D world to 2D screen's cartesian plane
+    static void drawWorld(World &world);       // Renders 3D world on 2D screen's cartesian plane
+  
+    static void handleInput();         // Decide if an action is needed
+    static void update(World &world);  // Perform the needed action
 
-    static void renderShape(Shape &shape, Connections &connections); // Renders 3d shape on 2d screen's cartesian plane
-    static void renderPoint(Point2D &p2D, Color color);            // Renders 3d point on 2d screen's cartesian plane
+    static void render(World &world);  // Render world via render pipeline, Transform->Project->Draw
 
-    static void moveShape(Shape &shape, float dx, float dy);        // Move shape by dx and dy
-    static void handleInput(Shape &shape);
+    // TEMP DEBUG FUCTION
+    static void pushWorldIntoView(World &world, int amount);
+
     // clang-format on
 };
