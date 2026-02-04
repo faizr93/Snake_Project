@@ -9,8 +9,8 @@ class Controller
     static int  moveSpeed;
     static int  selectedShapeIndex;
 
-    static raylib::Vector3 camMove;
-    static raylib::Vector3 shapeMove;
+    static Vec3 camMove;
+    static Vec3 shapeMove;
 
     static void handleInput();        // Decide if an action is needed
     static void update(World &world); // Perform the needed action

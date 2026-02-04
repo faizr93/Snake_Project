@@ -1,3 +1,4 @@
+#include "vector3D.h"
 #include "renderer.h"
 #include "globals.h"
 #include "raylib-cpp.hpp"
@@ -8,7 +9,7 @@
 - Inverts Y axis around the origin
 - Centers origin on 0,0
 */
-void Renderer::transformPoint(raylib::Vector3 &p)
+void Renderer::transformPoint(Vec3 &p)
 {
     p.y = -p.y;
     p.x += (GetScreenWidth()  - POINT_SIZE) / 2;
@@ -18,7 +19,7 @@ void Renderer::transformPoint(raylib::Vector3 &p)
 /* 
 - Project the 3D Point onto the 2D screen
 */
-void Renderer::projectPoint(raylib::Vector3 &p)
+void Renderer::projectPoint(Vec3 &p)
 {
     p.z = p.z == 0 ? 1 : p.z;
 
@@ -34,14 +35,14 @@ void Renderer::projectPoint(raylib::Vector3 &p)
 - Projects 3D point to 2D
 - Transforms to cartesian plane
 */
-void Renderer::preparePoint(raylib::Vector3 &p)
+void Renderer::preparePoint(Vec3 &p)
 {
     projectPoint(p);              // Convert from 3D to 2D
     transformPoint(p);            // Translate to cartesiasn plane
 }
 
 // Render the 2D point on screen in given Color
-void Renderer::drawPoint(raylib::Vector3 &p, Color color)
+void Renderer::drawPoint(Vec3 &p, Color color)
 {
     // Turn point into renderable rectangles with size
     raylib::Rectangle rect = {p.x, p.y, POINT_SIZE, POINT_SIZE};  
@@ -57,7 +58,10 @@ void Renderer::transformShape(Shape &shape)
     // Move
     for (auto &point : shape.vertices)
     {
-        point += shape.position;
+        point.x += shape.position.x;
+        point.y += shape.position.y;
+        point.z += shape.position.z;
+        
     }
 }
 
@@ -76,8 +80,8 @@ void Renderer::drawShape(Shape &shape)
 {
     for(auto &edge: shape.edges) 
     {
-        raylib::Vector3 A = shape.vertices[edge.first];
-        raylib::Vector3 B = shape.vertices[edge.second];
+        Vec3 A = shape.vertices[edge.first];
+        Vec3 B = shape.vertices[edge.second];
 
         float offset = POINT_SIZE/2;
         DrawLine(A.x+offset, A.y+offset, B.x+offset, B.y+offset, edge.color);  // Render Edge
@@ -91,7 +95,9 @@ void Renderer::transformWorld(World &world)
     for (auto &shape : world.shapes)
     {
         // shape.move({camDx,camDy,camDy});
-        shape.position -= world.camera.position;
+        shape.position.x -= world.camera.position.x;
+        shape.position.y -= world.camera.position.y;
+        shape.position.z -= world.camera.position.z;
         transformShape(shape);
     }
 }

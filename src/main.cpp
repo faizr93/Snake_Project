@@ -1,6 +1,7 @@
 #include "raylib-cpp.hpp"
 #include "controller.h"
 #include "renderer.h"
+#include "vector3D.h"
 #include <iostream>
 #include <vector>
 
